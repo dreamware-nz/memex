@@ -1,0 +1,15 @@
+# Build output
+/ctx
+/memex
+*.exe
+*.test
+*.out
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Go workspace caches (usually outside repo, but be safe)
+/vendor/
