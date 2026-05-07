@@ -14,29 +14,33 @@ three things in one binary:
 
 ## Install on a new machine
 
-Requirements: Go ≥ 1.25, an HTTP-reachable `proxy.golang.org`, and one
-of the supported host agents (Claude Code, Codex, Cursor, Gemini CLI,
-or VS Code Copilot).
+Requirements: Go ≥ 1.25 on PATH (Go ≥ 1.21 will auto-fetch the right
+toolchain), an HTTP-reachable `proxy.golang.org`, and one of the
+supported host agents below.
+
+### One-liner
 
 ```sh
-# 1. Build & install the binary into $GOBIN (defaults to ~/go/bin)
-go install github.com/dreamware-nz/memex/cmd/memex@latest
-
-# 2. Make sure $GOBIN is on PATH
-export PATH="$(go env GOBIN):$PATH"   # or ~/go/bin if GOBIN is unset
-which memex                            # should print the install path
-
-# 3. Wire into the host agent (auto-detected; --platform overrides)
-memex setup install
-
-# 4. Verify
-memex setup validate
-memex doctor
+curl -fsSL https://raw.githubusercontent.com/dreamware-nz/memex/main/install.sh | sh
 ```
 
-`setup install` records the running binary's absolute path in the host
-agent's hook commands and `.mcp.json`, so wherever you put `memex` is
-where the agent will find it.
+This runs [`install.sh`](./install.sh) which: builds memex via
+`go install`, places it in `$(go env GOBIN || go env GOPATH/bin)`,
+wires it into the auto-detected host agent via `memex setup install`,
+and runs `memex setup validate` to confirm.
+
+### Manual
+
+```sh
+go install github.com/dreamware-nz/memex/cmd/memex@latest
+export PATH="$(go env GOBIN || echo $(go env GOPATH)/bin):$PATH"
+memex setup install      # auto-detect host; --platform <id> to override
+memex setup validate
+```
+
+`setup install` records the running binary's absolute path in the
+host agent's hook commands and `.mcp.json`, so wherever you put `memex`
+is where the agent will find it.
 
 **For Claude Code users: fully quit and reopen Claude Code after
 `setup install`.** MCP servers declared in plugin `.mcp.json` files are
