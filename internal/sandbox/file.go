@@ -13,6 +13,7 @@ import (
 var langByExt = map[string]string{
 	".py": "python",
 	".js": "node",
+	".ts": "typescript",
 	".sh": "shell",
 }
 
@@ -44,6 +45,8 @@ func RunFile(ctx context.Context, path string, opts RunOptions) (Result, error) 
 		return RunPython(ctx, string(code), opts)
 	case "node":
 		return RunNode(ctx, string(code), opts)
+	case "typescript":
+		return RunTypeScript(ctx, string(code), opts)
 	case "shell":
 		opts.Command = []string{"sh", "-c", string(code)}
 		return Run(ctx, opts)

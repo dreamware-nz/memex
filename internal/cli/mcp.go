@@ -49,6 +49,8 @@ func (sandboxExecutor) Execute(language, code string) (string, string, int, erro
 		res, err = sandbox.RunPython(ctx, code, mcpRunOpts())
 	case "node", "javascript", "js":
 		res, err = sandbox.RunNode(ctx, code, mcpRunOpts())
+	case "ts", "typescript":
+		res, err = sandbox.RunTypeScript(ctx, code, mcpRunOpts())
 	case "shell", "sh", "bash":
 		opts := mcpRunOpts()
 		opts.Command = []string{"sh", "-c", code}
