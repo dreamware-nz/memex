@@ -18,6 +18,8 @@ func TestSearch(t *testing.T) {
 		{"TestSearchWithFallback_FuzzyStage", testFallbackFuzzyStage},
 		{"TestSearchWithFallback_SourceScoping", testFallbackSourceScoping},
 		{"TestSearchWithFallback_NoMatches", testFallbackNoMatches},
+		{"TestSearch_HyphenatedIdentifierFindable", testSearchHyphenatedIdentifierFindable},
+		{"TestSearch_LeadingHyphenNegationPreserved", testSearchLeadingHyphenNegationPreserved},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, tc.run)
@@ -163,6 +165,56 @@ func testSearchSnippetPopulated(t *testing.T) {
 	if strings.TrimSpace(results[0].Snippet) == "" {
 		t.Fatalf("Snippet empty, want non-empty")
 	}
+}
+
+func testSearchHyphenatedIdentifierFindable(t *testing.T) {
+	s := newStore(t)
+
+	if err := s.Index("hyphen-id", "# Note\n\ntag: polyglot-sandbox-77 marker\n"); err != nil {
+		t.Fatalf("Index: %v", err)
+	}
+
+	results, err := s.Search([]string{"polyglot-sandbox-77"}, 5)
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if len(results) < 1 {
+		t.Fatalf("results = %d, want >= 1", len(results))
+	}
+	if !strings.Contains(results[0].Body, "polyglot-sandbox-77") {
+		t.Fatalf("Body = %q, want it to contain %q", results[0].Body, "polyglot-sandbox-77")
+	}
+}
+
+func testSearchLeadingHyphenNegationPreserved(t *testing.T) {
+	s := newStore(t)
+
+	if err := s.Index("with-bar", "# A\n\ntoken zqxlepton occurs alongside bar in this body\n"); err != nil {
+		t.Fatalf("Index with-bar: %v", err)
+	}
+	if err := s.Index("without-bar", "# B\n\ntoken zqxlepton stands alone in this body\n"); err != nil {
+		t.Fatalf("Index without-bar: %v", err)
+	}
+
+	results, err := s.Search([]string{"zqxlepton -bar"}, 5)
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("results = %d, want 1 (the without-bar source); got sources=%v",
+			len(results), sourcesOf(results))
+	}
+	if results[0].Source != "without-bar" {
+		t.Fatalf("Source = %q, want %q", results[0].Source, "without-bar")
+	}
+}
+
+func sourcesOf(rs []SearchResult) []string {
+	out := make([]string, 0, len(rs))
+	for _, r := range rs {
+		out = append(out, r.Source)
+	}
+	return out
 }
 
 func testSearchEmptyStore(t *testing.T) {

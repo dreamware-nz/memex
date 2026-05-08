@@ -103,7 +103,7 @@ func (s *Store) SearchWithFallback(query string, limit int, source string) ([]Se
 }
 
 func porterStage(db *sql.DB, query string, limit int, source string) ([]SearchResult, error) {
-	hits, err := scopedFTSQuery(db, query, limit, source)
+	hits, err := scopedFTSQuery(db, sanitizeFTS5Query(query), limit, source)
 	if err != nil {
 		return nil, err
 	}
@@ -346,7 +346,7 @@ WHERE sections_fts MATCH ?
 ORDER BY sections_fts.rank
 LIMIT ?`
 
-	rows, err := db.Query(sqlStmt, snippetTokens, query, limit)
+	rows, err := db.Query(sqlStmt, snippetTokens, sanitizeFTS5Query(query), limit)
 	if err != nil {
 		return nil, fmt.Errorf("kb: search query %q: %w", query, err)
 	}
