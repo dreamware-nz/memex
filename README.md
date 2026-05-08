@@ -158,6 +158,32 @@ rather than the haystack. Index cost is paid once at fetch time;
 slice cost is paid per question, regardless of corpus size or how
 many sessions you spread the work across.
 
+## Why not context-mode itself?
+
+memex is heavily inspired by
+[context-mode](https://github.com/mksglu/context-mode) by Mert
+Koseoğlu — same conceptual model (FTS5 KB, sandboxed exec, hook-based
+context routing). Full credit there.
+
+So why a different binary? context-mode ships as a Node/TypeScript
+package on npm. For me, juggling Node versions across projects — nvm,
+corepack, native-module rebuilds, peer-dep drift,
+npm-vs-pnpm-vs-bun arguments — meant the install was broken more
+often than it was working. Every "let me just upgrade Node" was a
+20-minute side-quest when I wanted to get back to work.
+
+memex is a Go port of the same idea: one statically-linked binary, no
+runtime, no `node_modules`. `go install` drops it in `$GOPATH/bin`;
+every subsequent agent invocation just runs it. The trade is real —
+you lose npm as a distribution channel and the JS-native ergonomics —
+but `cp memex /elsewhere/bin/memex` is the entire deployment story,
+and it doesn't care which Node happens to be on the box.
+
+If your stack is already Node-shaped and you've never had an install
+break across versions, use context-mode — it's the more polished
+implementation with a real community. memex exists for the "I want
+this to work the next time I open my laptop" use case.
+
 ## Install on a new machine
 
 Requirements: Go ≥ 1.25 on PATH (Go ≥ 1.21 will auto-fetch the right
