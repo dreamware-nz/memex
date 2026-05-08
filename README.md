@@ -68,6 +68,10 @@ go install github.com/dreamware-nz/memex/cmd/memex@latest
 memex setup install     # re-stamps hook & .mcp.json paths
 ```
 
+Then **fully quit and reopen Claude Code** (or your host agent) so the
+MCP server reloads the new binary — an in-flight session keeps running
+the old one until restart.
+
 `memex_upgrade` (the MCP tool) returns this same command so an agent
 can self-upgrade on request.
 
